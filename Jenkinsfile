@@ -17,13 +17,19 @@ pipeline {
                 sh 'terraform --version'
             }
         }
+        stage('Install Python3 venv') {
+            steps {
+                sh '''
+                    sudo apt-get update
+                    sudo apt-get install -y python3-venv
+                '''
+            }
+        }
         stage('Setup Python Virtual Environment') {
             steps {
                 sh '''
-                    # Install Python virtual environment if not already installed
                     python3 -m venv venv
                     . venv/bin/activate
-                    # Upgrade pip
                     pip install --upgrade pip
                 '''
             }

@@ -9,7 +9,7 @@ pipeline {
     stages {
         stage('Checkout from Git') {
             steps {
-                git branch: 'main', url: 'https://github.com/tkibnyusuf/uber-clone.git'
+                git branch: 'main', url: 'https://github.com/olu-salem/uber-clone.git'
             }
         }
         stage('Terraform version') {

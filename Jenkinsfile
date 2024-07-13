@@ -9,7 +9,7 @@ pipeline {
     stages {
         stage('Checkout from Git') {
             steps {
-                git branch: 'main', url: 'https://github.com/olu-salem/uber-clone.git'
+                git branch: 'main', url: 'https://github.com/tkibnyusuf/uber-clone.git'
             }
         }
         stage('Terraform version') {
@@ -17,39 +17,47 @@ pipeline {
                 sh 'terraform --version'
             }
         }
+        stage('Setup Python Virtual Environment') {
+            steps {
+                sh '''
+                    # Install Python virtual environment if not already installed
+                    python3 -m venv venv
+                    . venv/bin/activate
+                    # Upgrade pip
+                    pip install --upgrade pip
+                '''
+            }
+        }
         stage('Install Checkov') {
             steps {
-                script {
-                    // Install Checkov
-                    sh 'pip3 install checkov'
-                }
+                sh '''
+                    . venv/bin/activate
+                    pip install checkov
+                '''
             }
         }
         stage('Checkov scan') {
             steps {
                 dir('EKS_Terraform') {
-                    script {
-                        // Run Checkov scan
-                        sh 'checkov -d . --output-file-path checkov_report.json --quiet'
-                    }
+                    sh '''
+                        . ../venv/bin/activate
+                        checkov -d . --output-file-path checkov_report.json --quiet
+                    '''
                 }
             }
         }
         stage('Publish Checkov Report') {
             steps {
-                script {
-                    // Publish Checkov report
-                    publishHTML(target: [
-                        reportDir: 'EKS_Terraform',
-                        reportFiles: 'checkov_report.json',
-                        reportName: 'Checkov Report',
-                        alwaysLinkToLastBuild: true,
-                        keepAll: true
-                    ])
-                }
+                publishHTML(target: [
+                    reportDir: 'EKS_Terraform',
+                    reportFiles: 'checkov_report.json',
+                    reportName: 'Checkov Report',
+                    alwaysLinkToLastBuild: true,
+                    keepAll: true
+                ])
             }
         }
-        stage('Terraform init') {           
+        stage('Terraform init') {
             steps {
                 dir('EKS_Terraform') {
                     sh 'terraform init'
@@ -76,6 +84,11 @@ pipeline {
                     sh 'terraform ${action} --auto-approve'
                 }
             }
+        }
+    }
+    post {
+        always {
+            sh 'rm -rf venv'
         }
     }
 }

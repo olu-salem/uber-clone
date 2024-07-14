@@ -14,7 +14,7 @@ pipeline{
         }
         stage('Checkout from Git'){
             steps{
-                git branch: 'main', url: 'https://github.com/tkibnyusuf/uber-clone.git'
+                git branch: 'main', url: 'https://github.com/olu-salem/uber-clone.git'
             }
         }
         stage("Sonarqube Analysis "){
@@ -63,7 +63,7 @@ pipeline{
         }
         stage("TRIVY"){
             steps{
-                sh "trivy image tkibnyusuf/uber:latest > trivyimage.json"
+                sh "trivy image oso007/uber:latest > trivyimage.json"
             }
         }        
         stage('Deploy to kubernetes'){
